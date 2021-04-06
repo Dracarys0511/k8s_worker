@@ -1,0 +1,60 @@
+---
+# tasks file for k8s_worker
+- name: "Configuring Yum Repository"
+  yum_repository:
+          name: kubernetes
+          description: kubernetes.repo
+          baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+          enabled: yes
+          gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+          exclude: kubelet kubeadm kubectl
+
+- name: "Installing the required Softwares"
+  yum:
+      name: "{{ item }}"
+      state: present
+      disable_excludes: kubernetes
+  loop:
+       - docker
+       - iproute-tc
+       - kubeadm
+
+- name: Starting Docker and Kubelet services
+  service:
+          name: "{{ item }}"
+          state: started
+          enabled: yes
+  loop:
+       - docker
+       - kubelet
+
+- name: kubeadm image pull
+  command: "kubeadm config images pull"
+
+- name: Changing Docker drivers
+  copy:
+       dest: /etc/docker/daemon.json
+       content: |
+                 {
+                         "exec-opts" : ["native.cgroupdriver=systemd"]
+                         }
+
+- name: Restarting docker
+  service:
+          name: docker
+          state: restarted
+
+- name: Configuring the kubernetes network
+  copy:
+     src: k8s.conf     
+     dest: /etc/sysctl.d
+
+- name: Changing parameters for the kernel
+  command: "sysctl --system"
+
+- name: Joining the cluster
+  shell: "{{ token }}"
+  register: joined
+
+- debug:
+        var: joined.stdout_lines
