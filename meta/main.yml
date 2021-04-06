@@ -31,6 +31,9 @@ galaxy_info:
   name: RHEL
   versions: 
       - all
+  name: CentOS
+  versions:
+      - all
   #   - 25
   #   - 1.0
   #   - 7
