@@ -28,11 +28,11 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms: 
-  name: RHEL
-  versions: all
+  - name: RHEL
+    versions: all
   #   - 25
-  name: CentOS
-  versions: all
+  - name: CentOS
+    versions: all
   #   - 1.0
   #   - 7
   #   - 99.99
